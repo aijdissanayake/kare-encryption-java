@@ -1,0 +1,30 @@
+{
+    "run": {
+        "default": "",
+        "items": [
+            {
+                "name": "building-java-libraries",
+                "projectName": "building-java-libraries",
+                "workingDirectory": "/media/achala/Data1/Kare/Back-end/Encrption/Java/building-java-libraries",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    },
+    "debug": {
+        "default": "",
+        "items": [
+            {
+                "name": "building-java-libraries",
+                "projectName": "building-java-libraries",
+                "workingDirectory": "/media/achala/Data1/Kare/Back-end/Encrption/Java/building-java-libraries",
+                "args": [],
+                "vmargs": [],
+                "env": {},
+                "preLaunchTask": ""
+            }
+        ]
+    }
+}
