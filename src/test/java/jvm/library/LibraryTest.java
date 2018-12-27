@@ -11,10 +11,27 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import org.bouncycastle.operator.OperatorCreationException;
 
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Objects;
+// import java.util.Arrays;
+
+
 public class LibraryTest {
     @Test public void testGenerateKeyPair() throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException  {
-        // Library classUnderTest = new Library();
         assertTrue("generateKeyPair should return 'true'", Library.generateKeyPair("\\keyTest\\pbn.key", "\\keyTest\\pvn.key"));
         assertTrue("keyGen should return 'true'", Library.keyGen());
+    }
+
+    @Test public void testEncryptDecrypt(){
+        KeyPair keyPair = Library.generateKeyPair();
+        PrivateKey pvtKey = keyPair.getPrivate();
+        PublicKey pubKey = keyPair.getPublic();
+        String enc = Library.encrypt(pubKey, "abcde");
+        System.out.println(enc);
+        String dec = Library.decrypt(pvtKey, enc);
+        System.out.println(dec);
+        assertTrue("decrypted value should equal to 'abcde'", Objects.equals(dec, "abcde"));
     }
 }

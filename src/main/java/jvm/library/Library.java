@@ -5,7 +5,7 @@ package jvm.library;
 // import java.security.NoSuchAlgorithmException;
 // import java.security.PrivateKey;
 // import java.security.PublicKey;
-// import javax.crypto.Cipher;
+import javax.crypto.Cipher;
 // import java.io.DataOutputStream;
 // import java.io.File;
 // import java.io.FileOutputStream;
@@ -19,7 +19,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 // import java.security.spec.PKCS8EncodedKeySpec;
-// import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 // import java.io.IOException;
@@ -51,10 +51,11 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 
 public class Library {
 
-    private static final String algorithm = "RSA";	
+    private static final String algorithm = "RSA";
 
 	public static boolean generateKeyPair(String publicKeyOutput, String privateKeyOutput) {
 		try {
@@ -102,8 +103,8 @@ public class Library {
         //     fos.write(encodedString.getBytes());
         // }
 
-        writePemFile((RSAPrivateKey) privateKey, "RSA PRIVATE KEY", "id_rsa.key");
-		writePemFile((RSAPublicKey) publicKey, "RSA PUBLIC KEY", "id_rsa_pub.key");
+        // writePemFile((RSAPrivateKey) privateKey, "RSA PRIVATE KEY", "id_rsa.key");
+		// writePemFile((RSAPublicKey) publicKey, "RSA PUBLIC KEY", "id_rsa_pub.key");
 
     }
 
@@ -134,10 +135,14 @@ public class Library {
 
             //public key
             PublicKey pub = keyPair.getPublic();
+            // X509V3CertificateGenerator cgen = new X509V3CertificateGenerator();
+            // cgen.setPublicKey(pub);
             byte[] pubBytes = pub.getEncoded();
 
+            
             SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(pubBytes);
             ASN1Primitive primitive = spkInfo.parsePublicKey();
+            // final X509EncodedKeySpec primitive = new X509EncodedKeySpec(pubBytes);
             byte[] publicKeyPKCS1 = primitive.getEncoded();
 
             PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
@@ -146,10 +151,15 @@ public class Library {
             pemWriter.writeObject(pemObject);
             pemWriter.close();
             String pemString = stringWriter.toString();
-            FileOutputStream fos2 = new FileOutputStream("pubk.pem");  
+            FileOutputStream fos2 = new FileOutputStream("pubk.key");  
             fos2.write(pemString.getBytes());  
             fos2.flush();  
             fos2.close();
+
+            final X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pubBytes);
+            try (FileOutputStream fos = new FileOutputStream("testpub.key")) {
+                fos.write(x509EncodedKeySpec.getEncoded());
+            }
 
             return true;
 
@@ -157,8 +167,45 @@ public class Library {
             e.printStackTrace();
         }
         return false;
-    } 
-    
+    }
 
+    public static KeyPair generateKeyPair(){
+        try {
+			final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
+			keyGen.initialize(2048, new SecureRandom());
+			final KeyPair keyPair = keyGen.generateKeyPair();
+			return keyPair;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return null;
+    }
+
+    public static String encrypt(PublicKey key, String data) {		
+		try {
+			final Cipher cipher = Cipher.getInstance(algorithm);
+			cipher.init(Cipher.ENCRYPT_MODE, key);
+			return  Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes()));
+
+		} catch (Exception e) {
+            e.printStackTrace();
+		}
+		return null;
+    }
     
+    public static String decrypt(PrivateKey key, String encryptedData) {		
+
+		try {
+			final Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[] enc64Bytes = encryptedData.getBytes();
+            byte[] encBytes = Base64.getDecoder().decode(enc64Bytes);
+			return new String(cipher.doFinal(encBytes));
+
+		} catch (Exception e) {
+            e.printStackTrace();
+		}
+		return null;
+	}    
 }
