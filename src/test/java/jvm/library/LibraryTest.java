@@ -5,10 +5,16 @@ package jvm.library;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+ 
+import java.io.IOException;  
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import org.bouncycastle.operator.OperatorCreationException;
 
 public class LibraryTest {
-    @Test public void testGenerateKeyPair() {
+    @Test public void testGenerateKeyPair() throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException  {
         // Library classUnderTest = new Library();
-        assertTrue("someLibraryMethod should return 'true'", Library.generateKeyPair("\\keyTest\\pb.key", "\\keyTest\\pv.key"));
+        assertTrue("generateKeyPair should return 'true'", Library.generateKeyPair("\\keyTest\\pbn.key", "\\keyTest\\pvn.key"));
+        assertTrue("keyGen should return 'true'", Library.keyGen());
     }
 }
