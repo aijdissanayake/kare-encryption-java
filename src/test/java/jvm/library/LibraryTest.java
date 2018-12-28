@@ -15,12 +15,16 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Objects;
-// import java.util.Arrays;
 
 
 public class LibraryTest {
     @Test public void testGenerateKeyPair() throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException  {
-        assertTrue("keyGen should return 'true'", Library.keyGen());
+        KeyPair keyPair = Library.generateKeyPair();
+        PrivateKey pvtKey = keyPair.getPrivate();
+        PublicKey pubKey = keyPair.getPublic();
+        assertTrue("savePrivateKey should return 'true'",Library.savePrivateKey(pvtKey, "pvtT.key"));
+        assertTrue("savePublicKey should return 'true'",Library.savePublicKey(pubKey, "pubT.key"));
+
     }
 
     @Test public void testEncryptDecrypt(){

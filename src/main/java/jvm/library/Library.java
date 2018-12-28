@@ -47,9 +47,9 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 // import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Primitive;
+// import org.bouncycastle.asn1.ASN1Primitive;
 // import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+// import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 // import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 // import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -76,41 +76,43 @@ public class Library {
         return generateKeyPair(2048);
     }
 
-    public static boolean keyGen() throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
+    public static boolean savePrivateKey(PrivateKey privateKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
         try{
-            KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA");  
-            kpGen.initialize(2048, new SecureRandom());  
-            KeyPair keyPair = kpGen.generateKeyPair();
-        
-            //unencrypted private key form of PKCS#8  
-            JcaPKCS8Generator gen1 = new JcaPKCS8Generator(keyPair.getPrivate(), null);  
+            JcaPKCS8Generator gen1 = new JcaPKCS8Generator(privateKey, null);  
             PemObject obj1 = gen1.generate();  
             StringWriter sw1 = new StringWriter();  
             try (JcaPEMWriter pw = new JcaPEMWriter(sw1)) {  
             pw.writeObject(obj1);  
             }  
             String pkcs8Key1 = sw1.toString();  
-            FileOutputStream fos1 = new FileOutputStream("pvtk.key");  
+            FileOutputStream fos1 = new FileOutputStream(fileSavePath);  
             fos1.write(pkcs8Key1.getBytes());  
             fos1.flush();  
             fos1.close(); 
 
-            //public key
-            PublicKey pub = keyPair.getPublic();
-            byte[] pubBytes = pub.getEncoded();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean savePublicKey(PublicKey publicKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
+        try{
+            byte[] pubBytes = publicKey.getEncoded();
             PemObject pemObject = new PemObject("PUBLIC KEY", pubBytes);
             StringWriter stringWriter = new StringWriter();
             PemWriter pemWriter = new PemWriter(stringWriter);
             pemWriter.writeObject(pemObject);
             pemWriter.close();
             String pemString = stringWriter.toString();
-            FileOutputStream fos2 = new FileOutputStream("pubk.key");  
+            FileOutputStream fos2 = new FileOutputStream(fileSavePath);  
             fos2.write(pemString.getBytes());  
             fos2.flush();  
             fos2.close();
 
             return true;
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -143,6 +145,7 @@ public class Library {
 		return null;
     }
     
+    // refine
     public static PublicKey getPublicKey(String publicKeyPath) throws Exception {
 		return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(Files.readAllBytes(Paths.get(publicKeyPath))));
     }
