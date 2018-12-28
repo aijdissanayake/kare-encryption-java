@@ -76,32 +76,31 @@ public class Library {
         return generateKeyPair(2048);
     }
 
-    public static boolean savePrivateKey(PrivateKey privateKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
+    public static boolean savePublicKey(PublicKey publicKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
         try{
-            JcaPKCS8Generator gen1 = new JcaPKCS8Generator(privateKey, null);  
-            PemObject obj1 = gen1.generate();  
-            StringWriter sw1 = new StringWriter();  
-            try (JcaPEMWriter pw = new JcaPEMWriter(sw1)) {  
-            pw.writeObject(obj1);  
-            }  
-            String pkcs8Key1 = sw1.toString();  
-            FileOutputStream fos1 = new FileOutputStream(fileSavePath);  
-            fos1.write(pkcs8Key1.getBytes());  
-            fos1.flush();  
-            fos1.close(); 
+            byte[] pubBytes = publicKey.getEncoded();
+            PemObject pemObject = new PemObject("PUBLIC KEY", pubBytes);
+            StringWriter stringWriter = new StringWriter();
+            PemWriter pemWriter = new PemWriter(stringWriter);
+            pemWriter.writeObject(pemObject);
+            pemWriter.close();
+            String pemString = stringWriter.toString();
+            FileOutputStream fos2 = new FileOutputStream(fileSavePath);  
+            fos2.write(pemString.getBytes());  
+            fos2.flush();  
+            fos2.close();
 
             return true;
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public static boolean savePublicKey(PublicKey publicKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
+    public static boolean savePrivateKey(PrivateKey privateKey, String fileSavePath) throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException {
         try{
-            byte[] pubBytes = publicKey.getEncoded();
-            PemObject pemObject = new PemObject("PUBLIC KEY", pubBytes);
+            byte[] pvtBytes = privateKey.getEncoded();
+            PemObject pemObject = new PemObject("PRIVATE KEY", pvtBytes);
             StringWriter stringWriter = new StringWriter();
             PemWriter pemWriter = new PemWriter(stringWriter);
             pemWriter.writeObject(pemObject);
@@ -154,25 +153,7 @@ public class Library {
 		return KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get(privateKeyPath))));
     }
     
-    public static PrivateKey getPrivateKeyString(String keyString) throws Exception{
-        // Remove the first and last lines
 
-        String privKeyPEM = keyString.replace("-----BEGIN RSA PRIVATE KEY-----\n", "");
-        privKeyPEM = privKeyPEM.replace("-----END RSA PRIVATE KEY-----", "");
-        System.out.println(privKeyPEM);
-
-        // Base64 decode the data
-
-        byte [] encoded = org.bouncycastle.util.encoders.Base64.decode(privKeyPEM);
-
-        // PKCS8 decode the encoded RSA private key
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PrivateKey privKey = kf.generatePrivate(keySpec);
-        return privKey;
-
-    }
 
     public static PublicKey getPublicKeyFile(String filename) throws Exception {
         byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
