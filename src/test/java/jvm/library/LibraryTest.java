@@ -20,7 +20,6 @@ import java.util.Objects;
 
 public class LibraryTest {
     @Test public void testGenerateKeyPair() throws NoSuchAlgorithmException, IOException, OperatorCreationException, InvalidKeySpecException  {
-        assertTrue("generateKeyPair should return 'true'", Library.generateKeyPair("\\keyTest\\pbn.key", "\\keyTest\\pvn.key"));
         assertTrue("keyGen should return 'true'", Library.keyGen());
     }
 
@@ -33,5 +32,15 @@ public class LibraryTest {
         String dec = Library.decrypt(pvtKey, enc);
         System.out.println(dec);
         assertTrue("decrypted value should equal to 'abcde'", Objects.equals(dec, "abcde"));
+    }
+
+    @Test public void testKeyImport() throws Exception {
+            PublicKey pubKey = Library.getPublicKey("sample_public.key");
+            PrivateKey pvtKey = Library.getPrivateKeyString("sample_private_key");
+            String enc = Library.encrypt(pubKey, "abcde");
+            System.out.println(enc);
+            String dec = Library.decrypt(pvtKey, enc);
+            System.out.println(dec);
+            assertTrue("decrypted value should equal to 'abcde'", Objects.equals(dec, "abcde"));
     }
 }
