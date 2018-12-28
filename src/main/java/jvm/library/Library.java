@@ -13,6 +13,7 @@ import javax.crypto.Cipher;
 // import java.security.KeyPairGenerator;
 // import java.security.Key;
 // import java.security.SecureRandom;
+import java.security.Security;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -20,21 +21,26 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.security.NoSuchProviderException;
 // import java.security.interfaces.RSAPrivateKey;
 // import java.security.interfaces.RSAPublicKey;
 // import java.io.IOException;
-// import java.io.FileNotFoundException;
+import java.io.FileNotFoundException;
 // import java.io.Writer;
-// import java.io.FileWriter;
+// import java.io.FileWriter; 
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 
 // import javax.crypto.Cipher;
 // import javax.xml.bind.DatatypeConverter;
 import java.util.Base64;
  
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;  
-import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
+// import org.bouncycastle.openssl.jcajce.JcaPEMWriter;  
+// import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.io.pem.PemObject; 
+import org.bouncycastle.util.io.pem.PemReader; 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
    
 import java.io.FileOutputStream;  
@@ -145,6 +151,37 @@ public class Library {
     }
     
     // refine
+
+    public static PublicKey importPublicKey(String filename) throws FileNotFoundException, IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException{
+        Security.addProvider(new BouncyCastleProvider());
+        PemReader pemReader = new PemReader(new InputStreamReader(new FileInputStream(filename)));
+        try {
+            PemObject pemObject = pemReader.readPemObject();
+            byte[] content = pemObject.getContent();
+            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(content);
+            KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
+            return factory.generatePublic(pubKeySpec);
+        }finally {
+            pemReader.close();
+        }
+        
+    }
+
+    public static PrivateKey importPrivateKey(String filename) throws FileNotFoundException, IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException{
+        Security.addProvider(new BouncyCastleProvider());
+        PemReader pemReader = new PemReader(new InputStreamReader(new FileInputStream(filename)));
+        try {
+            PemObject pemObject = pemReader.readPemObject();
+            byte[] content = pemObject.getContent();
+            PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(content);
+            KeyFactory factory = KeyFactory.getInstance("RSA", "BC");
+            return factory.generatePrivate(privKeySpec);
+        }finally {
+            pemReader.close();
+        }
+        
+    }
+
     public static PublicKey getPublicKey(String publicKeyPath) throws Exception {
 		return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(Files.readAllBytes(Paths.get(publicKeyPath))));
     }

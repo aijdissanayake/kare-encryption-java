@@ -39,12 +39,12 @@ public class LibraryTest {
     }
 
     @Test public void testKeyImport() throws Exception {
-            // PublicKey pubKey = Library.getPublicKey("sample_public.key");
-            // PrivateKey pvtKey = Library.getPrivateKeyString("sample_private_key");
-            // String enc = Library.encrypt(pubKey, "abcde");
-            // System.out.println(enc);
-            // String dec = Library.decrypt(pvtKey, enc);
-            // System.out.println(dec);
-            // assertTrue("decrypted value should equal to 'abcde'", Objects.equals(dec, "abcde"));
+            PublicKey pubKey = Library.importPublicKey("pubT.key");
+            PrivateKey pvtKey = Library.importPrivateKey("pvtT.key");
+            String enc = Library.encrypt(pubKey, "abcde");
+            System.out.println(enc);
+            String dec = Library.decrypt(pvtKey, enc);
+            System.out.println(dec);
+            assertTrue("decrypted value should equal to 'abcde'", Objects.equals(dec, "abcde"));
     }
 }
